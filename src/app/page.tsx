@@ -20,9 +20,13 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [voucherData, setVoucherData] = useState<VoucherData | null>(null);
-  const [clientVoucherData, setClientVoucherData] = useState<VoucherData | null>(null);
   const [error, setError] = useState<{ message: string; suggestions?: string[] } | null>(null);
   const { toast } = useToast();
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -44,53 +48,47 @@ export default function Home() {
   }, [isLoading]);
 
    useEffect(() => {
-    if (voucherData) {
-      // When voucherData is set, we also set a client-side version of it.
-      // This is the version we will update with client-only data.
-      setClientVoucherData(JSON.parse(JSON.stringify(voucherData)));
-    }
-  }, [voucherData]);
-
-   useEffect(() => {
-    // This effect runs only on the client and only when clientVoucherData changes.
-    // It's safe to use Math.random() here.
-    if (clientVoucherData?.service && clientVoucherData.report) {
-        const newReport = { ...clientVoucherData.report };
+    if (voucherData && isMounted) {
+        const newReport = { ...voucherData.report };
         let updated = false;
-        switch (clientVoucherData.service) {
+        switch (voucherData.service) {
             case "CDR (Call Logs)":
-                newReport["Total Calls"] = Math.floor(Math.random() * 100) + 50;
-                newReport["Total Duration"] = `${Math.floor(Math.random() * 500) + 100} minutes`;
-                newReport["Last Call"] = new Date(Date.now() - Math.random() * 1e10).toLocaleDateString();
-                updated = true;
+                if (newReport["Total Calls"] === 0) {
+                  newReport["Total Calls"] = Math.floor(Math.random() * 100) + 50;
+                  newReport["Total Duration"] = `${Math.floor(Math.random() * 500) + 100} minutes`;
+                  newReport["Last Call"] = new Date(Date.now() - Math.random() * 1e10).toLocaleDateString();
+                  updated = true;
+                }
                 break;
             case "Location Tracking":
-                newReport["Latitude"] = (23.8103 + (Math.random() - 0.5) * 0.1).toFixed(6);
-                newReport["Longitude"] = (90.4125 + (Math.random() - 0.5) * 0.1).toFixed(6);
-                newReport["Last Updated"] = new Date().toISOString();
-                updated = true;
+                if (newReport["Latitude"] === "0.000000") {
+                  newReport["Latitude"] = (23.8103 + (Math.random() - 0.5) * 0.1).toFixed(6);
+                  newReport["Longitude"] = (90.4125 + (Math.random() - 0.5) * 0.1).toFixed(6);
+                  newReport["Last Updated"] = new Date().toISOString();
+                  updated = true;
+                }
                 break;
             case "Nagad Info":
             case "Nagad Statement":
             case "Bkash Info":
             case "Bkash Statement":
             case "IMEI to All Numbers":
-                newReport["Balance"] = `৳${(Math.random() * 10000).toFixed(2)}`;
-                newReport["Recent Transactions"] = Math.floor(Math.random() * 20) + 5;
-                updated = true;
+                 if (newReport["Balance"] === `৳0.00`) {
+                    newReport["Balance"] = `৳${(Math.random() * 10000).toFixed(2)}`;
+                    newReport["Recent Transactions"] = Math.floor(Math.random() * 20) + 5;
+                    updated = true;
+                }
                 break;
         }
 
         if(updated) {
-            setClientVoucherData(prev => prev ? ({ ...prev, report: newReport }) : null);
+            setVoucherData(prev => prev ? ({ ...prev, report: newReport }) : null);
         }
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [clientVoucherData?.service]);
+  }, [voucherData, isMounted]);
   
   const resetState = () => {
     setVoucherData(null);
-    setClientVoucherData(null);
     setError(null);
     setIsLoading(false);
     setProgress(0);
@@ -99,7 +97,6 @@ export default function Home() {
   const handleGenerate = async (data: FormValues) => {
     setIsLoading(true);
     setVoucherData(null);
-    setClientVoucherData(null);
     setError(null);
     
     const result = await generateVoucher(data.service, data.inputValue);
@@ -127,6 +124,8 @@ export default function Home() {
     }, 500);
   };
 
+  const displayVoucher = isMounted ? voucherData : null;
+
   return (
     <main className="flex min-h-screen w-full flex-col items-center justify-center p-4 sm:p-8 bg-background bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.15),rgba(255,255,255,0))]">
       <div className="w-full max-w-2xl mx-auto">
@@ -140,7 +139,7 @@ export default function Home() {
         </div>
 
         <div className="bg-card/50 border border-border/50 shadow-2xl rounded-lg p-6 sm:p-8 backdrop-blur-sm min-h-[300px] flex flex-col justify-center">
-          { !isLoading && !clientVoucherData && !error && (
+          { !isLoading && !displayVoucher && !error && (
             <ServiceForm onSubmit={handleGenerate} isLoading={isLoading} />
           )}
 
@@ -175,9 +174,9 @@ export default function Home() {
               </div>
             )}
 
-            {!isLoading && clientVoucherData && (
+            {!isLoading && displayVoucher && (
               <div className="space-y-6">
-                  <VoucherSheet data={clientVoucherData} />
+                  <VoucherSheet data={displayVoucher} />
                   <Button onClick={resetState} variant="outline" className="w-full no-print">
                     <RotateCcw className="mr-2 h-4 w-4" />
                     Generate Another Voucher
