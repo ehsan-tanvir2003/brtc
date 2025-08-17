@@ -7,7 +7,7 @@ import { Download, Timer } from "lucide-react";
 import { Logo } from "./Logo";
 import { Button } from "./ui/button";
 import jsPDF from "jspdf";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface VoucherSheetProps {
   data: VoucherData;
@@ -15,7 +15,13 @@ interface VoucherSheetProps {
 
 export function VoucherSheet({ data }: VoucherSheetProps) {
   const [isDownloading, setIsDownloading] = useState(false);
-  const displayTimestamp = new Date(data.timestamp).toLocaleString();
+  const [displayTimestamp, setDisplayTimestamp] = useState("");
+  
+  useEffect(() => {
+    // Format timestamp on client to avoid hydration mismatch
+    setDisplayTimestamp(new Date(data.timestamp).toLocaleString());
+  }, [data.timestamp]);
+
 
   const handleDownloadPdf = async () => {
     setIsDownloading(true);
@@ -72,7 +78,7 @@ export function VoucherSheet({ data }: VoucherSheetProps) {
         };
         
         addField("Order ID:", data.orderId);
-        addField("Timestamp:", displayTimestamp);
+        addField("Timestamp:", new Date(data.timestamp).toLocaleString());
         addField("Service:", data.service);
         addField("Target:", data.inputValue);
         if(data.operator) addField("Operator:", data.operator);
@@ -148,7 +154,7 @@ export function VoucherSheet({ data }: VoucherSheetProps) {
               </div>
               <div className="space-y-1">
                 <p className="text-muted-foreground">Timestamp</p>
-                <p className="font-mono">{displayTimestamp}</p>
+                <p className="font-mono">{displayTimestamp || " "}</p>
               </div>
               <div className="space-y-1">
                 <p className="text-muted-foreground">Service</p>
