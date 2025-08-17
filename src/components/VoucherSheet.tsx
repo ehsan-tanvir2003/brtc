@@ -1,7 +1,6 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import type { VoucherData } from "@/types";
@@ -12,54 +11,23 @@ interface VoucherSheetProps {
   data: VoucherData;
 }
 
-// Helper to format values safely on the client
-const formatClientValue = (key: string, value: any) => {
-    if (value === null || typeof value === 'undefined') return 'N/A';
-    try {
-        if (key.toLowerCase().includes('date') || key.toLowerCase().includes('timestamp') || key.toLowerCase().includes('updated') || key.toLowerCase().includes('call')) {
-             const date = new Date(value);
-             // Check if date is valid before formatting
-             return isNaN(date.getTime()) ? String(value) : date.toLocaleString();
-        }
-        if (typeof value === 'number') {
-            return value.toLocaleString();
-        }
-        if (Array.isArray(value)) {
-            return value.join(', ');
-        }
-    } catch (e) {
-        // Fallback for any formatting error
-        return String(value);
-    }
-    return String(value);
-};
-
-
-const renderReport = (report: Record<string, any>, isClient: boolean) => {
+const renderReport = (report: Record<string, any>) => {
   return (
     <ul className="space-y-2 font-mono text-sm">
-      {Object.entries(report).map(([key, value]) => {
-        const displayValue = isClient ? formatClientValue(key, value) : String(value);
-
-        return (
-          <li key={key} className="flex flex-wrap justify-between border-b border-dashed border-border/50 pb-2">
-            <span className="capitalize text-muted-foreground mr-2">{key.replace(/_/g, " ")}:</span>
-            <span className="text-accent text-right break-all">{displayValue}</span>
-          </li>
-        );
-      })}
+      {Object.entries(report).map(([key, value]) => (
+        <li key={key} className="flex flex-wrap justify-between border-b border-dashed border-border/50 pb-2">
+          <span className="capitalize text-muted-foreground mr-2">{key.replace(/_/g, " ")}:</span>
+          <span className="text-accent text-right break-all">{Array.isArray(value) ? value.join(', ') : String(value)}</span>
+        </li>
+      ))}
     </ul>
   );
 };
 
 export function VoucherSheet({ data }: VoucherSheetProps) {
-  const [isClient, setIsClient] = useState(false);
-
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
-  
-  const formattedTimestamp = isClient ? new Date(data.timestamp).toLocaleString() : data.timestamp;
+  // Display the timestamp directly as it comes from the server to ensure consistency.
+  // The client can interpret it in its local timezone if needed, but we avoid re-formatting.
+  const displayTimestamp = new Date(data.timestamp).toLocaleString();
 
   return (
     <div id="voucher-to-print" className="voucher-print-area">
@@ -84,7 +52,8 @@ export function VoucherSheet({ data }: VoucherSheetProps) {
             </div>
             <div className="space-y-1">
               <p className="text-muted-foreground">Timestamp</p>
-              <p className="font-mono">{formattedTimestamp}</p>
+              {/* Render an empty span on the server and the formatted date on the client */}
+              <p className="font-mono">{displayTimestamp}</p>
             </div>
             <div className="space-y-1">
               <p className="text-muted-foreground">Service</p>
@@ -98,7 +67,7 @@ export function VoucherSheet({ data }: VoucherSheetProps) {
           <Separator />
           <div>
             <h3 className="text-lg font-semibold mb-3 font-headline text-primary">Success Report</h3>
-            {renderReport(data.report, isClient)}
+            {renderReport(data.report)}
           </div>
         </CardContent>
         <CardFooter className="no-print pt-6">
