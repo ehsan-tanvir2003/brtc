@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -14,12 +15,27 @@ interface VoucherSheetProps {
 const renderReport = (report: Record<string, any>) => {
   return (
     <ul className="space-y-2 font-mono text-sm">
-      {Object.entries(report).map(([key, value]) => (
-        <li key={key} className="flex flex-wrap justify-between border-b border-dashed border-border/50 pb-2">
-          <span className="capitalize text-muted-foreground mr-2">{key.replace(/_/g, " ")}:</span>
-          <span className="text-accent text-right break-all">{Array.isArray(value) ? value.join(', ') : String(value)}</span>
-        </li>
-      ))}
+      {Object.entries(report).map(([key, value]) => {
+        let displayValue = value;
+        if (key === 'Last Updated' || key === 'Last Call') {
+            try {
+                displayValue = new Date(value).toLocaleString();
+            } catch (e) {
+                // Keep original value if date is invalid
+            }
+        } else if (Array.isArray(value)) {
+            displayValue = value.join(', ');
+        } else {
+            displayValue = String(value);
+        }
+
+        return (
+          <li key={key} className="flex flex-wrap justify-between border-b border-dashed border-border/50 pb-2">
+            <span className="capitalize text-muted-foreground mr-2">{key.replace(/_/g, " ")}:</span>
+            <span className="text-accent text-right break-all">{displayValue}</span>
+          </li>
+        );
+      })}
     </ul>
   );
 };
