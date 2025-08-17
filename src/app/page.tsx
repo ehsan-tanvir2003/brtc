@@ -56,7 +56,7 @@ export default function Home() {
                 if (newReport["Total Calls"] === 0) {
                   newReport["Total Calls"] = Math.floor(Math.random() * 100) + 50;
                   newReport["Total Duration"] = `${Math.floor(Math.random() * 500) + 100} minutes`;
-                  newReport["Last Call"] = new Date(Date.now() - Math.random() * 1e10).toLocaleDateString();
+                  newReport["Last Call"] = new Date(Date.now() - Math.random() * 1e10).toISOString();
                   updated = true;
                 }
                 break;

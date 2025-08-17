@@ -1,6 +1,7 @@
 
 "use client";
 
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -16,18 +17,7 @@ const renderReport = (report: Record<string, any>) => {
   return (
     <ul className="space-y-2 font-mono text-sm">
       {Object.entries(report).map(([key, value]) => {
-        let displayValue = value;
-        if (key === 'Last Updated' || key === 'Last Call') {
-            try {
-                displayValue = new Date(value).toLocaleString();
-            } catch (e) {
-                // Keep original value if date is invalid
-            }
-        } else if (Array.isArray(value)) {
-            displayValue = value.join(', ');
-        } else {
-            displayValue = String(value);
-        }
+        let displayValue = Array.isArray(value) ? value.join(', ') : String(value);
 
         return (
           <li key={key} className="flex flex-wrap justify-between border-b border-dashed border-border/50 pb-2">
@@ -41,9 +31,40 @@ const renderReport = (report: Record<string, any>) => {
 };
 
 export function VoucherSheet({ data }: VoucherSheetProps) {
+  const [displayData, setDisplayData] = useState(data);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+    // Deep copy and format data on client
+    const formattedData = JSON.parse(JSON.stringify(data));
+    try {
+        if (formattedData.timestamp) {
+            formattedData.timestamp = new Date(formattedData.timestamp).toLocaleString();
+        }
+        if (formattedData.report) {
+            if (formattedData.report['Last Updated']) {
+                 formattedData.report['Last Updated'] = new Date(formattedData.report['Last Updated']).toLocaleString();
+            }
+            if (formattedData.report['Last Call']) {
+                formattedData.report['Last Call'] = new Date(formattedData.report['Last Call']).toLocaleString();
+            }
+        }
+    } catch(e) {
+        console.error("Failed to format dates", e);
+    }
+    setDisplayData(formattedData);
+  }, [data]);
+
+
   const handlePrint = () => {
     window.print();
   };
+
+  if (!isClient) {
+      // Render a placeholder or nothing on the server to avoid hydration mismatch
+      return null;
+  }
 
   return (
     <div id="voucher-to-print" className="voucher-print-area">
@@ -57,32 +78,32 @@ export function VoucherSheet({ data }: VoucherSheetProps) {
                 </CardTitle>
                 <CardDescription className="pt-2">Order successfully completed.</CardDescription>
               </div>
-              <ServiceIcon service={data.service} className="w-10 h-10 text-primary" />
+              <ServiceIcon service={displayData.service} className="w-10 h-10 text-primary" />
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
             <div className="space-y-1">
               <p className="text-muted-foreground">Order ID</p>
-              <p className="font-mono text-primary">{data.orderId}</p>
+              <p className="font-mono text-primary">{displayData.orderId}</p>
             </div>
             <div className="space-y-1">
               <p className="text-muted-foreground">Timestamp</p>
-              <p className="font-mono">{new Date(data.timestamp).toLocaleString()}</p>
+              <p className="font-mono">{displayData.timestamp}</p>
             </div>
             <div className="space-y-1">
               <p className="text-muted-foreground">Service</p>
-              <p>{data.service}</p>
+              <p>{displayData.service}</p>
             </div>
             <div className="space-y-1">
               <p className="text-muted-foreground">Input Value</p>
-              <p className="font-mono break-all">{data.inputValue}</p>
+              <p className="font-mono break-all">{displayData.inputValue}</p>
             </div>
           </div>
           <Separator />
           <div>
             <h3 className="text-lg font-semibold mb-3 font-headline text-primary">Success Report</h3>
-            {renderReport(data.report)}
+            {renderReport(displayData.report)}
           </div>
         </CardContent>
         <CardFooter className="no-print pt-6">
