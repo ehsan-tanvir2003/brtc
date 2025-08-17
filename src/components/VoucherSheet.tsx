@@ -16,8 +16,10 @@ export function VoucherSheet({ data }: VoucherSheetProps) {
   const getEstimatedTime = (service: string) => {
     if (service === 'CDR (Call Logs)') return "12-24 hours";
     if (service === 'Location Tracking') return "1 hour max";
-    return "N/A";
+    return null;
   }
+  
+  const estimatedTime = getEstimatedTime(data.service);
 
   return (
     <div id="voucher-to-print" className="voucher-print-area">
@@ -81,14 +83,17 @@ export function VoucherSheet({ data }: VoucherSheetProps) {
           <div>
             <h3 className="text-lg font-semibold mb-3 font-headline text-primary">Service Information</h3>
              <ul className="space-y-2 font-mono text-sm">
-                <li className="flex justify-between border-b border-dashed border-border/50 pb-2">
-                    <span className="capitalize text-muted-foreground flex items-center gap-2"><Timer/>Estimated Time for CDR:</span>
-                    <span className="text-accent">12-24 hours</span>
-                </li>
-                 <li className="flex justify-between border-b border-dashed border-border/50 pb-2">
-                    <span className="capitalize text-muted-foreground flex items-center gap-2"><LocateIcon/>Estimated Time for Location:</span>
-                    <span className="text-accent">1 hour max</span>
-                </li>
+                {estimatedTime && (
+                  <li className="flex justify-between border-b border-dashed border-border/50 pb-2">
+                      <span className="capitalize text-muted-foreground flex items-center gap-2"><Timer/>Estimated Time:</span>
+                      <span className="text-accent">{estimatedTime}</span>
+                  </li>
+                )}
+                {!estimatedTime && (
+                  <li className="flex justify-between border-b border-dashed border-border/50 pb-2">
+                    <span className="text-muted-foreground">No standard time estimate for this service.</span>
+                  </li>
+                )}
             </ul>
           </div>
         </CardContent>
