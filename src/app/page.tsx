@@ -43,7 +43,8 @@ export default function Home() {
   }, [isLoading]);
 
    useEffect(() => {
-    if (voucherData?.report) {
+    if (voucherData?.service && voucherData.report) {
+      const generateDynamicData = () => {
         const newReport = { ...voucherData.report };
         let updated = false;
         switch (voucherData.service) {
@@ -73,8 +74,11 @@ export default function Home() {
         if(updated) {
             setVoucherData(prev => prev ? ({ ...prev, report: newReport }) : null);
         }
+      }
+      // Ensure this runs only on the client
+      generateDynamicData();
     }
-  }, [voucherData?.service, voucherData?.report]);
+  }, [voucherData?.service]);
   
   const resetState = () => {
     setVoucherData(null);
