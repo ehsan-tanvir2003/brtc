@@ -29,34 +29,15 @@ export function VoucherSheet({ data }: VoucherSheetProps) {
   
     setIsDownloading(true);
   
-    // Add the pdf-render class to apply specific styles for PDF
-    voucherElement.classList.add('pdf-render');
-  
-    // Find all Next/Image components and ensure they are loaded
-    const images = Array.from(voucherElement.getElementsByTagName('img'));
-    const promises = images.map(img => {
-      if (img.complete && img.naturalHeight !== 0) return Promise.resolve();
-      return new Promise(resolve => { 
-        img.onload = resolve; 
-        img.onerror = resolve; // Resolve on error too, to not block pdf generation
-      });
-    });
-  
-    await Promise.all(promises);
-    
-    // A small delay to ensure styles are applied, especially for web fonts
-    await new Promise(resolve => setTimeout(resolve, 100));
-  
     try {
       const canvas = await html2canvas(voucherElement, {
-        scale: 3, // Increased scale for better quality
+        scale: 3, 
         useCORS: true,
-        backgroundColor: '#ffffff', // Explicitly set background to white
-        onclone: (document) => {
-            const clonedVoucher = document.getElementById('voucher-to-print');
+        backgroundColor: '#ffffff',
+        onclone: (clonedDoc) => {
+            const clonedVoucher = clonedDoc.getElementById('voucher-to-print');
             if(clonedVoucher) {
-                // Ensure the class is on the cloned element as well
-                 clonedVoucher.classList.add('pdf-render');
+                clonedVoucher.classList.add('pdf-render');
             }
         }
       });
@@ -75,9 +56,8 @@ export function VoucherSheet({ data }: VoucherSheetProps) {
       const canvasHeight = canvas.height;
       
       const canvasAspectRatio = canvasWidth / canvasHeight;
-      const pdfAspectRatio = pdfWidth / pdfHeight;
       
-      let renderWidth = pdfWidth - 40; // Add some padding
+      let renderWidth = pdfWidth - 40;
       let renderHeight = renderWidth / canvasAspectRatio;
   
       if (renderHeight > pdfHeight - 40) {
@@ -94,11 +74,10 @@ export function VoucherSheet({ data }: VoucherSheetProps) {
     } catch (err) {
       console.error("Error generating PDF", err);
     } finally {
-      // Clean up the class after we're done.
-      voucherElement.classList.remove('pdf-render');
       setIsDownloading(false);
     }
   };
+
 
   return (
     <div>

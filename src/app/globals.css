@@ -69,6 +69,7 @@
   object-fit: contain !important; /* Ensures the logo is not cropped */
   max-width: 100% !important;
   height: auto !important;
+  width: auto !important;
 }
 
 .pdf-render .text-primary {
