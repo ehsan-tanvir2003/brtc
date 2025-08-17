@@ -11,6 +11,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/Logo";
+import { NetworkStatusAnimation } from "@/components/NetworkStatusAnimation";
 
 interface FormValues {
   service: ServiceName;
@@ -92,6 +93,7 @@ export default function Home() {
 
   return (
     <main className="flex min-h-screen w-full flex-col items-center justify-center p-4 sm:p-8 bg-background bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.15),rgba(255,255,255,0))]">
+       <NetworkStatusAnimation />
       <div className="w-full max-w-2xl mx-auto">
         <div className="text-center mb-10 flex flex-col items-center">
            <Logo className="h-24 w-24 mb-4" />

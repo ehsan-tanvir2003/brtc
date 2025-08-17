@@ -88,10 +88,15 @@ export default {
             height: '0',
           },
         },
+        'bar-wave': {
+          '0%, 100%': { transform: 'scaleY(0.5)' },
+          '50%': { transform: 'scaleY(1.5)' },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
+        'bar-wave': 'bar-wave 1s ease-in-out infinite',
       },
     },
   },
