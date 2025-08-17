@@ -3,7 +3,7 @@
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import type { VoucherData } from "@/types";
-import { Download, Timer } from "lucide-react";
+import { Download, Timer, Image as ImageIcon } from "lucide-react";
 import { Logo } from "./Logo";
 import { Button } from "./ui/button";
 import jsPDF from "jspdf";
@@ -15,7 +15,8 @@ interface VoucherSheetProps {
 }
 
 export function VoucherSheet({ data }: VoucherSheetProps) {
-  const [isDownloading, setIsDownloading] = useState(false);
+  const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
+  const [isDownloadingImage, setIsDownloadingImage] = useState(false);
   const [displayTimestamp, setDisplayTimestamp] = useState("");
   
   useEffect(() => {
@@ -23,13 +24,55 @@ export function VoucherSheet({ data }: VoucherSheetProps) {
     setDisplayTimestamp(new Date(data.timestamp).toLocaleString());
   }, [data.timestamp]);
 
+  const handleDownloadImage = async () => {
+    const voucherElement = document.getElementById("voucher-to-print");
+    if (!voucherElement) return;
+
+    setIsDownloadingImage(true);
+
+    try {
+      const canvas = await html2canvas(voucherElement, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#ffffff',
+         onclone: (clonedDoc) => {
+            const clonedVoucher = clonedDoc.getElementById('voucher-to-print');
+            if(clonedVoucher) {
+                clonedVoucher.classList.add('pdf-render');
+            }
+        }
+      });
+      const imgData = canvas.toDataURL("image/png");
+      const link = document.createElement('a');
+      link.download = `voucher-${data.orderId}.png`;
+      link.href = imgData;
+      link.click();
+    } catch (err) {
+      console.error("Error generating image", err);
+    } finally {
+      setIsDownloadingImage(false);
+    }
+  };
+
+
   const handleDownloadPdf = async () => {
     const voucherElement = document.getElementById("voucher-to-print");
     if (!voucherElement) return;
   
-    setIsDownloading(true);
+    setIsDownloadingPdf(true);
   
     try {
+       // Wait for all images to load before rendering
+      const images = Array.from(voucherElement.getElementsByTagName('img'));
+      const promises = images.map(img => {
+        if (img.complete) return Promise.resolve();
+        return new Promise<void>(resolve => {
+          img.onload = () => resolve();
+          img.onerror = () => resolve(); // Resolve even on error to not block PDF generation
+        });
+      });
+      await Promise.all(promises);
+
       const canvas = await html2canvas(voucherElement, {
         scale: 3, 
         useCORS: true,
@@ -56,20 +99,21 @@ export function VoucherSheet({ data }: VoucherSheetProps) {
       const canvasHeight = canvas.height;
       
       const canvasAspectRatio = canvasWidth / canvasHeight;
-      const pdfAspectRatio = pdfWidth / pdfHeight;
+      const pageAspectRatio = pdfWidth / pdfHeight;
 
-      let renderWidth, renderHeight;
+      let renderWidth, renderHeight, x, y;
+      const margin = 40; // 20pt margin on each side
 
-      if (canvasAspectRatio > pdfAspectRatio) {
-          renderWidth = pdfWidth - 40;
+      if (canvasAspectRatio > pageAspectRatio) {
+          renderWidth = pdfWidth - margin;
           renderHeight = renderWidth / canvasAspectRatio;
       } else {
-          renderHeight = pdfHeight - 40;
+          renderHeight = pdfHeight - margin;
           renderWidth = renderHeight * canvasAspectRatio;
       }
       
-      const x = (pdfWidth - renderWidth) / 2;
-      const y = (pdfHeight - renderHeight) / 2;
+      x = (pdfWidth - renderWidth) / 2;
+      y = (pdfHeight - renderHeight) / 2;
       
       pdf.addImage(imgData, "PNG", x, y, renderWidth, renderHeight);
       pdf.save(`voucher-${data.orderId}.pdf`);
@@ -77,7 +121,7 @@ export function VoucherSheet({ data }: VoucherSheetProps) {
     } catch (err) {
       console.error("Error generating PDF", err);
     } finally {
-      setIsDownloading(false);
+      setIsDownloadingPdf(false);
     }
   };
 
@@ -164,10 +208,14 @@ export function VoucherSheet({ data }: VoucherSheetProps) {
           </CardFooter>
         </Card>
       </div>
-      <div className="no-print">
-        <Button onClick={handleDownloadPdf} disabled={isDownloading} className="w-full mt-4">
+      <div className="no-print mt-4 flex flex-col sm:flex-row gap-2">
+        <Button onClick={handleDownloadImage} disabled={isDownloadingImage} className="w-full">
+            <ImageIcon className="mr-2 h-4 w-4" />
+            {isDownloadingImage ? "Downloading..." : "Download as Image"}
+        </Button>
+        <Button onClick={handleDownloadPdf} disabled={isDownloadingPdf} className="w-full">
             <Download className="mr-2 h-4 w-4" />
-            {isDownloading ? "Downloading..." : "Download PDF"}
+            {isDownloadingPdf ? "Downloading..." : "Download PDF"}
         </Button>
       </div>
     </div>
