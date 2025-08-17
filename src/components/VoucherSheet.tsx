@@ -56,13 +56,16 @@ export function VoucherSheet({ data }: VoucherSheetProps) {
       const canvasHeight = canvas.height;
       
       const canvasAspectRatio = canvasWidth / canvasHeight;
-      
-      let renderWidth = pdfWidth - 40;
-      let renderHeight = renderWidth / canvasAspectRatio;
-  
-      if (renderHeight > pdfHeight - 40) {
-        renderHeight = pdfHeight - 40;
-        renderWidth = renderHeight * canvasAspectRatio;
+      const pdfAspectRatio = pdfWidth / pdfHeight;
+
+      let renderWidth, renderHeight;
+
+      if (canvasAspectRatio > pdfAspectRatio) {
+          renderWidth = pdfWidth - 40;
+          renderHeight = renderWidth / canvasAspectRatio;
+      } else {
+          renderHeight = pdfHeight - 40;
+          renderWidth = renderHeight * canvasAspectRatio;
       }
       
       const x = (pdfWidth - renderWidth) / 2;
