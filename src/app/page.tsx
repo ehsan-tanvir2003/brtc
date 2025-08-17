@@ -38,9 +38,10 @@ export default function Home() {
             clearInterval(timer);
             return 95;
           }
-          return prev + Math.floor(Math.random() * 5) + 1;
+          // Using a consistent increment instead of random
+          return prev + 5;
         });
-      }, 400);
+      }, 100);
     }
     return () => {
       clearInterval(timer);
