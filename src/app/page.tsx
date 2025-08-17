@@ -20,6 +20,7 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [voucherData, setVoucherData] = useState<VoucherData | null>(null);
+  const [clientVoucherData, setClientVoucherData] = useState<VoucherData | null>(null);
   const [error, setError] = useState<{ message: string; suggestions?: string[] } | null>(null);
   const { toast } = useToast();
 
@@ -43,11 +44,20 @@ export default function Home() {
   }, [isLoading]);
 
    useEffect(() => {
-    if (voucherData?.service && voucherData.report) {
-      const generateDynamicData = () => {
-        const newReport = { ...voucherData.report };
+    if (voucherData) {
+      // When voucherData is set, we also set a client-side version of it.
+      // This is the version we will update with client-only data.
+      setClientVoucherData(JSON.parse(JSON.stringify(voucherData)));
+    }
+  }, [voucherData]);
+
+   useEffect(() => {
+    // This effect runs only on the client and only when clientVoucherData changes.
+    // It's safe to use Math.random() here.
+    if (clientVoucherData?.service && clientVoucherData.report) {
+        const newReport = { ...clientVoucherData.report };
         let updated = false;
-        switch (voucherData.service) {
+        switch (clientVoucherData.service) {
             case "CDR (Call Logs)":
                 newReport["Total Calls"] = Math.floor(Math.random() * 100) + 50;
                 newReport["Total Duration"] = `${Math.floor(Math.random() * 500) + 100} minutes`;
@@ -72,16 +82,15 @@ export default function Home() {
         }
 
         if(updated) {
-            setVoucherData(prev => prev ? ({ ...prev, report: newReport }) : null);
+            setClientVoucherData(prev => prev ? ({ ...prev, report: newReport }) : null);
         }
-      }
-      // Ensure this runs only on the client
-      generateDynamicData();
     }
-  }, [voucherData?.service]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [clientVoucherData?.service]);
   
   const resetState = () => {
     setVoucherData(null);
+    setClientVoucherData(null);
     setError(null);
     setIsLoading(false);
     setProgress(0);
@@ -90,6 +99,7 @@ export default function Home() {
   const handleGenerate = async (data: FormValues) => {
     setIsLoading(true);
     setVoucherData(null);
+    setClientVoucherData(null);
     setError(null);
     
     const result = await generateVoucher(data.service, data.inputValue);
@@ -130,7 +140,7 @@ export default function Home() {
         </div>
 
         <div className="bg-card/50 border border-border/50 shadow-2xl rounded-lg p-6 sm:p-8 backdrop-blur-sm min-h-[300px] flex flex-col justify-center">
-          { !isLoading && !voucherData && !error && (
+          { !isLoading && !clientVoucherData && !error && (
             <ServiceForm onSubmit={handleGenerate} isLoading={isLoading} />
           )}
 
@@ -165,9 +175,9 @@ export default function Home() {
               </div>
             )}
 
-            {!isLoading && voucherData && (
+            {!isLoading && clientVoucherData && (
               <div className="space-y-6">
-                  <VoucherSheet data={voucherData} />
+                  <VoucherSheet data={clientVoucherData} />
                   <Button onClick={resetState} variant="outline" className="w-full no-print">
                     <RotateCcw className="mr-2 h-4 w-4" />
                     Generate Another Voucher
