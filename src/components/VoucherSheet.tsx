@@ -1,33 +1,23 @@
-
 "use client";
 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import type { VoucherData } from "@/types";
-import { FileText } from "lucide-react";
+import { FileText, Clock, Smartphone, LocateIcon, BadgePercent, Timer, Banknote } from "lucide-react";
 import { ServiceIcon } from "./ServiceIcon";
 
 interface VoucherSheetProps {
   data: VoucherData;
 }
 
-const renderReport = (report: Record<string, any>) => {
-  return (
-    <ul className="space-y-2 font-mono text-sm">
-      {Object.entries(report).map(([key, value]) => (
-        <li key={key} className="flex flex-wrap justify-between border-b border-dashed border-border/50 pb-2">
-          <span className="capitalize text-muted-foreground mr-2">{key.replace(/_/g, " ")}:</span>
-          <span className="text-accent text-right break-all">{Array.isArray(value) ? value.join(', ') : String(value)}</span>
-        </li>
-      ))}
-    </ul>
-  );
-};
-
 export function VoucherSheet({ data }: VoucherSheetProps) {
-  // Display the timestamp directly as it comes from the server to ensure consistency.
-  // The client can interpret it in its local timezone if needed, but we avoid re-formatting.
   const displayTimestamp = new Date(data.timestamp).toLocaleString();
+
+  const getEstimatedTime = (service: string) => {
+    if (service === 'CDR (Call Logs)') return "12-24 hours";
+    if (service === 'Location Tracking') return "1 hour max";
+    return "N/A";
+  }
 
   return (
     <div id="voucher-to-print" className="voucher-print-area">
@@ -39,7 +29,7 @@ export function VoucherSheet({ data }: VoucherSheetProps) {
                     <FileText />
                     Voucher Sheet
                 </CardTitle>
-                <CardDescription className="pt-2">Order successfully completed.</CardDescription>
+                <CardDescription className="pt-2">Order successfully created.</CardDescription>
               </div>
               <ServiceIcon service={data.service} className="w-10 h-10 text-primary" />
           </div>
@@ -52,7 +42,6 @@ export function VoucherSheet({ data }: VoucherSheetProps) {
             </div>
             <div className="space-y-1">
               <p className="text-muted-foreground">Timestamp</p>
-              {/* Render an empty span on the server and the formatted date on the client */}
               <p className="font-mono">{displayTimestamp}</p>
             </div>
             <div className="space-y-1">
@@ -60,14 +49,47 @@ export function VoucherSheet({ data }: VoucherSheetProps) {
               <p>{data.service}</p>
             </div>
             <div className="space-y-1">
-              <p className="text-muted-foreground">Input Value</p>
+              <p className="text-muted-foreground">Target Number</p>
               <p className="font-mono break-all">{data.inputValue}</p>
             </div>
+            {data.operator && (
+              <div className="space-y-1">
+                <p className="text-muted-foreground">Operator</p>
+                <p>{data.operator}</p>
+              </div>
+            )}
+            {data.timeDuration && (
+              <div className="space-y-1">
+                <p className="text-muted-foreground">Time Duration</p>
+                <p>{data.timeDuration}</p>
+              </div>
+            )}
+            {data.paymentTotal && (
+                 <div className="space-y-1">
+                    <p className="text-muted-foreground">Payment Total</p>
+                    <p className="font-mono">৳{data.paymentTotal}</p>
+                 </div>
+            )}
+            {data.deliveryTime && (
+                <div className="space-y-1">
+                    <p className="text-muted-foreground">Manual Delivery Time</p>
+                    <p>{data.deliveryTime}</p>
+                </div>
+            )}
           </div>
           <Separator />
           <div>
-            <h3 className="text-lg font-semibold mb-3 font-headline text-primary">Success Report</h3>
-            {renderReport(data.report)}
+            <h3 className="text-lg font-semibold mb-3 font-headline text-primary">Service Information</h3>
+             <ul className="space-y-2 font-mono text-sm">
+                <li className="flex justify-between border-b border-dashed border-border/50 pb-2">
+                    <span className="capitalize text-muted-foreground flex items-center gap-2"><Timer/>Estimated Time for CDR:</span>
+                    <span className="text-accent">12-24 hours</span>
+                </li>
+                 <li className="flex justify-between border-b border-dashed border-border/50 pb-2">
+                    <span className="capitalize text-muted-foreground flex items-center gap-2"><LocateIcon/>Estimated Time for Location:</span>
+                    <span className="text-accent">1 hour max</span>
+                </li>
+            </ul>
           </div>
         </CardContent>
         <CardFooter className="no-print pt-6">

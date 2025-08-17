@@ -6,7 +6,7 @@ import { VoucherSheet } from "@/components/VoucherSheet";
 import { Progress } from "@/components/ui/progress";
 import { generateVoucher } from "@/app/actions";
 import { useToast } from "@/hooks/use-toast";
-import type { VoucherData, ServiceName } from "@/types";
+import type { VoucherData, ServiceName, OperatorName, TimeDuration } from "@/types";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,10 @@ import { Button } from "@/components/ui/button";
 interface FormValues {
   service: ServiceName;
   inputValue: string;
+  operator?: OperatorName;
+  timeDuration?: TimeDuration;
+  paymentTotal?: string;
+  deliveryTime?: string;
 }
 
 export default function Home() {
@@ -35,7 +39,7 @@ export default function Home() {
           }
           return prev + 5;
         });
-      }, 150); // Adjusted interval for smoother progress
+      }, 150);
     }
     return () => {
       clearInterval(timer);
@@ -54,7 +58,14 @@ export default function Home() {
     setVoucherData(null);
     setError(null);
     
-    const result = await generateVoucher(data.service, data.inputValue);
+    const result = await generateVoucher(
+        data.service, 
+        data.inputValue, 
+        data.operator, 
+        data.timeDuration, 
+        data.paymentTotal,
+        data.deliveryTime
+    );
 
     setProgress(100);
 
@@ -73,7 +84,6 @@ export default function Home() {
       });
     }
     
-    // Using a timeout to give the user time to see the 100% progress
     setTimeout(() => {
         setIsLoading(false);
     }, 500);
@@ -127,7 +137,7 @@ export default function Home() {
               </div>
             )}
 
-            {!isLoading && voucherData && (
+            {voucherData && !isLoading && (
               <div className="space-y-6">
                   <VoucherSheet data={voucherData} />
                   <Button onClick={resetState} variant="outline" className="w-full no-print">

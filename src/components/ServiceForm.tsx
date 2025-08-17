@@ -13,7 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { serviceOptions, type ServiceName } from "@/types";
+import { serviceOptions, type ServiceName, operatorOptions, timeDurationOptions } from "@/types";
 import { ServiceIcon } from "@/components/ServiceIcon";
 import { Terminal } from "lucide-react";
 
@@ -22,6 +22,10 @@ const formSchema = z.object({
     required_error: "Please select a service.",
   }),
   inputValue: z.string().min(1, { message: "This field is required." }),
+  operator: z.enum(operatorOptions).optional(),
+  timeDuration: z.enum(timeDurationOptions).optional(),
+  paymentTotal: z.string().min(1, { message: "Payment amount is required."}),
+  deliveryTime: z.string().min(1, { message: "Delivery time is required." }),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -49,6 +53,8 @@ export function ServiceForm({ onSubmit, isLoading }: ServiceFormProps) {
     defaultValues: {
       service: serviceOptions[0],
       inputValue: "",
+      paymentTotal: "",
+      deliveryTime: "",
     },
   });
 
@@ -60,7 +66,7 @@ export function ServiceForm({ onSubmit, isLoading }: ServiceFormProps) {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-8">
+      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
         <FormField
           control={form.control}
           name="service"
@@ -107,6 +113,98 @@ export function ServiceForm({ onSubmit, isLoading }: ServiceFormProps) {
             </FormItem>
           )}
         />
+
+        {selectedService === "CDR (Call Logs)" && (
+          <>
+            <FormField
+              control={form.control}
+              name="operator"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Operator</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger className="bg-input">
+                        <SelectValue placeholder="Select an operator..." />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {operatorOptions.map((operator) => (
+                        <SelectItem key={operator} value={operator}>
+                          {operator}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="timeDuration"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Time Duration</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger className="bg-input">
+                        <SelectValue placeholder="Select time duration..." />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {timeDurationOptions.map((duration) => (
+                        <SelectItem key={duration} value={duration}>
+                          {duration}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </>
+        )}
+
+        <FormField
+          control={form.control}
+          name="paymentTotal"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Payment Total</FormLabel>
+              <FormControl>
+                <Input
+                  className="bg-input"
+                  placeholder="Enter amount paid by customer..."
+                  {...field}
+                  disabled={isLoading}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        
+        <FormField
+          control={form.control}
+          name="deliveryTime"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Time to Delivery</FormLabel>
+              <FormControl>
+                <Input
+                  className="bg-input"
+                  placeholder="e.g., 12-24 hours"
+                  {...field}
+                  disabled={isLoading}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         <Button type="submit" className="w-full" disabled={isLoading}>
           {isLoading ? "Executing..." : (
             <>

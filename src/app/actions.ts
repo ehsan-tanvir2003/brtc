@@ -1,45 +1,6 @@
 "use server";
 
-import type { ServiceName, VoucherData, GenerationResult } from "@/types";
-
-function generateDummyReport(service: ServiceName, inputValue: string): Record<string, any> {
-    switch (service) {
-        case "NID to All Number":
-            return {
-                "Target NID": inputValue,
-                "Linked Numbers": ["+88017********1", "+88018********2", "+88019********3"],
-                "Owner Name": "John Doe",
-            };
-        case "Mobile Number to NID":
-            return {
-                "Target Number": inputValue,
-                "NID Number": "1990123456789",
-                "Owner Name": "Jane Smith",
-                "Address": "123 Main St, Dhaka",
-            };
-        case "CDR (Call Logs)":
-             return {
-                "Target Number": inputValue,
-                "Total Calls": 0, // Placeholder
-                "Total Duration": `0 minutes`, // Placeholder
-                "Last Call": "N/A", // Placeholder
-            };
-        case "Location Tracking":
-            return {
-                "Target ID": inputValue,
-                "Latitude": "0.000000", // Placeholder
-                "Longitude": "0.000000", // Placeholder
-                "Last Updated": "N/A", // Placeholder
-            };
-        default:
-            return {
-                "Account": inputValue,
-                "Balance": `৳0.00`, // Placeholder
-                "Status": "Active",
-                "Recent Transactions": 0, // Placeholder
-            };
-    }
-}
+import type { ServiceName, VoucherData, GenerationResult, OperatorName, TimeDuration } from "@/types";
 
 function generateRandomOrderId(): string {
   const prefix = "IQDATA";
@@ -49,7 +10,11 @@ function generateRandomOrderId(): string {
 
 export async function generateVoucher(
   service: ServiceName,
-  inputValue: string
+  inputValue: string,
+  operator?: OperatorName,
+  timeDuration?: TimeDuration,
+  paymentTotal?: string,
+  deliveryTime?: string
 ): Promise<GenerationResult> {
   try {
     const orderId = generateRandomOrderId();
@@ -64,7 +29,11 @@ export async function generateVoucher(
       inputValue,
       timestamp,
       status: "Success",
-      report: generateDummyReport(service, inputValue),
+      report: { "Target Number": inputValue }, // Simplified report
+      operator,
+      timeDuration,
+      paymentTotal,
+      deliveryTime,
     };
 
     return { voucherData };
