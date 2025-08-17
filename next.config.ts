@@ -16,6 +16,12 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'btrc.gov.bd',
+        port: '',
+        pathname: '/**',
+      }
     ],
   },
 };
