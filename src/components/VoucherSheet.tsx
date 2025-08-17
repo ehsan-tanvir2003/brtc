@@ -13,27 +13,34 @@ interface VoucherSheetProps {
   data: VoucherData;
 }
 
+// Helper to format values safely on the client
+const formatClientValue = (key: string, value: any) => {
+    if (value === null || typeof value === 'undefined') return 'N/A';
+    try {
+        if (key.toLowerCase().includes('date') || key.toLowerCase().includes('timestamp') || key.toLowerCase().includes('updated') || key.toLowerCase().includes('call')) {
+             const date = new Date(value);
+             // Check if date is valid before formatting
+             return isNaN(date.getTime()) ? String(value) : date.toLocaleString();
+        }
+        if (typeof value === 'number') {
+            return value.toLocaleString();
+        }
+        if (Array.isArray(value)) {
+            return value.join(', ');
+        }
+    } catch (e) {
+        // Fallback for any formatting error
+        return String(value);
+    }
+    return String(value);
+};
+
+
 const renderReport = (report: Record<string, any>, isClient: boolean) => {
   return (
     <ul className="space-y-2 font-mono text-sm">
       {Object.entries(report).map(([key, value]) => {
-        let displayValue;
-        if (isClient) {
-            try {
-                if (key.toLowerCase().includes('date') || key.toLowerCase().includes('timestamp') || key.toLowerCase().includes('updated') || key.toLowerCase().includes('call')) {
-                    displayValue = new Date(value).toLocaleString();
-                } else if (typeof value === 'number') {
-                    displayValue = value.toLocaleString();
-                } else {
-                    displayValue = Array.isArray(value) ? value.join(', ') : String(value);
-                }
-            } catch (e) {
-                displayValue = Array.isArray(value) ? value.join(', ') : String(value);
-            }
-        } else {
-            displayValue = Array.isArray(value) ? value.join(', ') : String(value);
-        }
-
+        const displayValue = isClient ? formatClientValue(key, value) : String(value);
 
         return (
           <li key={key} className="flex flex-wrap justify-between border-b border-dashed border-border/50 pb-2">

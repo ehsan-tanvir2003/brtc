@@ -22,11 +22,6 @@ export default function Home() {
   const [voucherData, setVoucherData] = useState<VoucherData | null>(null);
   const [error, setError] = useState<{ message: string; suggestions?: string[] } | null>(null);
   const { toast } = useToast();
-  const [isMounted, setIsMounted] = useState(false);
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -38,10 +33,9 @@ export default function Home() {
             clearInterval(timer);
             return 95;
           }
-          // Using a consistent increment instead of random
           return prev + 5;
         });
-      }, 100);
+      }, 150); // Adjusted interval for smoother progress
     }
     return () => {
       clearInterval(timer);
@@ -79,13 +73,11 @@ export default function Home() {
       });
     }
     
+    // Using a timeout to give the user time to see the 100% progress
     setTimeout(() => {
         setIsLoading(false);
-        setProgress(0);
     }, 500);
   };
-
-  const displayVoucher = isMounted ? voucherData : null;
 
   return (
     <main className="flex min-h-screen w-full flex-col items-center justify-center p-4 sm:p-8 bg-background bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.15),rgba(255,255,255,0))]">
@@ -100,7 +92,7 @@ export default function Home() {
         </div>
 
         <div className="bg-card/50 border border-border/50 shadow-2xl rounded-lg p-6 sm:p-8 backdrop-blur-sm min-h-[300px] flex flex-col justify-center">
-          { !isLoading && !displayVoucher && !error && (
+          { !isLoading && !voucherData && !error && (
             <ServiceForm onSubmit={handleGenerate} isLoading={isLoading} />
           )}
 
@@ -135,9 +127,9 @@ export default function Home() {
               </div>
             )}
 
-            {!isLoading && displayVoucher && (
+            {!isLoading && voucherData && (
               <div className="space-y-6">
-                  <VoucherSheet data={displayVoucher} />
+                  <VoucherSheet data={voucherData} />
                   <Button onClick={resetState} variant="outline" className="w-full no-print">
                     <RotateCcw className="mr-2 h-4 w-4" />
                     Generate Another Voucher
