@@ -46,46 +46,6 @@ export default function Home() {
       clearInterval(timer);
     };
   }, [isLoading]);
-
-   useEffect(() => {
-    if (voucherData && isMounted) {
-        const newReport = { ...voucherData.report };
-        let updated = false;
-        switch (voucherData.service) {
-            case "CDR (Call Logs)":
-                if (newReport["Total Calls"] === 0) {
-                  newReport["Total Calls"] = Math.floor(Math.random() * 100) + 50;
-                  newReport["Total Duration"] = `${Math.floor(Math.random() * 500) + 100} minutes`;
-                  newReport["Last Call"] = new Date(Date.now() - Math.random() * 1e10).toISOString();
-                  updated = true;
-                }
-                break;
-            case "Location Tracking":
-                if (newReport["Latitude"] === "0.000000") {
-                  newReport["Latitude"] = (23.8103 + (Math.random() - 0.5) * 0.1).toFixed(6);
-                  newReport["Longitude"] = (90.4125 + (Math.random() - 0.5) * 0.1).toFixed(6);
-                  newReport["Last Updated"] = new Date().toISOString();
-                  updated = true;
-                }
-                break;
-            case "Nagad Info":
-            case "Nagad Statement":
-            case "Bkash Info":
-            case "Bkash Statement":
-            case "IMEI to All Numbers":
-                 if (newReport["Balance"] === `৳0.00`) {
-                    newReport["Balance"] = `৳${(Math.random() * 10000).toFixed(2)}`;
-                    newReport["Recent Transactions"] = Math.floor(Math.random() * 20) + 5;
-                    updated = true;
-                }
-                break;
-        }
-
-        if(updated) {
-            setVoucherData(prev => prev ? ({ ...prev, report: newReport }) : null);
-        }
-    }
-  }, [voucherData, isMounted]);
   
   const resetState = () => {
     setVoucherData(null);
