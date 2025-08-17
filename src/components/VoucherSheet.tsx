@@ -24,8 +24,10 @@ export function VoucherSheet({ data }: VoucherSheetProps) {
         setIsDownloading(true);
         html2canvas(voucherElement, { 
             scale: 2, // Higher scale for better quality
-            backgroundColor: '#1a202c', // Match dark theme background
-            useCORS: true
+            useCORS: true,
+            onclone: (document) => {
+              document.getElementById('voucher-to-print')?.classList.add('pdf-render');
+            }
         }).then(canvas => {
             const imgData = canvas.toDataURL('image/png');
             const pdf = new jsPDF({

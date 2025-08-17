@@ -50,6 +50,15 @@
   }
 }
 
+.pdf-render {
+  background: white !important;
+}
+
+.pdf-render * {
+  color: black !important;
+  border-color: #e2e8f0 !important; /* A light gray border color */
+}
+
 @media print {
   body * {
     visibility: hidden;
