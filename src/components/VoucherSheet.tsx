@@ -13,11 +13,27 @@ interface VoucherSheetProps {
   data: VoucherData;
 }
 
-const renderReport = (report: Record<string, any>) => {
+const renderReport = (report: Record<string, any>, isClient: boolean) => {
   return (
     <ul className="space-y-2 font-mono text-sm">
       {Object.entries(report).map(([key, value]) => {
-        let displayValue = Array.isArray(value) ? value.join(', ') : String(value);
+        let displayValue;
+        if (isClient) {
+            try {
+                if (key.toLowerCase().includes('date') || key.toLowerCase().includes('timestamp') || key.toLowerCase().includes('updated') || key.toLowerCase().includes('call')) {
+                    displayValue = new Date(value).toLocaleString();
+                } else if (typeof value === 'number') {
+                    displayValue = value.toLocaleString();
+                } else {
+                    displayValue = Array.isArray(value) ? value.join(', ') : String(value);
+                }
+            } catch (e) {
+                displayValue = Array.isArray(value) ? value.join(', ') : String(value);
+            }
+        } else {
+            displayValue = Array.isArray(value) ? value.join(', ') : String(value);
+        }
+
 
         return (
           <li key={key} className="flex flex-wrap justify-between border-b border-dashed border-border/50 pb-2">
@@ -31,40 +47,17 @@ const renderReport = (report: Record<string, any>) => {
 };
 
 export function VoucherSheet({ data }: VoucherSheetProps) {
-  const [displayData, setDisplayData] = useState(data);
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
-    // Deep copy and format data on client
-    const formattedData = JSON.parse(JSON.stringify(data));
-    try {
-        if (formattedData.timestamp) {
-            formattedData.timestamp = new Date(formattedData.timestamp).toLocaleString();
-        }
-        if (formattedData.report) {
-            if (formattedData.report['Last Updated']) {
-                 formattedData.report['Last Updated'] = new Date(formattedData.report['Last Updated']).toLocaleString();
-            }
-            if (formattedData.report['Last Call']) {
-                formattedData.report['Last Call'] = new Date(formattedData.report['Last Call']).toLocaleString();
-            }
-        }
-    } catch(e) {
-        console.error("Failed to format dates", e);
-    }
-    setDisplayData(formattedData);
-  }, [data]);
-
+  }, []);
 
   const handlePrint = () => {
     window.print();
   };
-
-  if (!isClient) {
-      // Render a placeholder or nothing on the server to avoid hydration mismatch
-      return null;
-  }
+  
+  const formattedTimestamp = isClient ? new Date(data.timestamp).toLocaleString() : data.timestamp;
 
   return (
     <div id="voucher-to-print" className="voucher-print-area">
@@ -78,32 +71,32 @@ export function VoucherSheet({ data }: VoucherSheetProps) {
                 </CardTitle>
                 <CardDescription className="pt-2">Order successfully completed.</CardDescription>
               </div>
-              <ServiceIcon service={displayData.service} className="w-10 h-10 text-primary" />
+              <ServiceIcon service={data.service} className="w-10 h-10 text-primary" />
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
             <div className="space-y-1">
               <p className="text-muted-foreground">Order ID</p>
-              <p className="font-mono text-primary">{displayData.orderId}</p>
+              <p className="font-mono text-primary">{data.orderId}</p>
             </div>
             <div className="space-y-1">
               <p className="text-muted-foreground">Timestamp</p>
-              <p className="font-mono">{displayData.timestamp}</p>
+              <p className="font-mono">{formattedTimestamp}</p>
             </div>
             <div className="space-y-1">
               <p className="text-muted-foreground">Service</p>
-              <p>{displayData.service}</p>
+              <p>{data.service}</p>
             </div>
             <div className="space-y-1">
               <p className="text-muted-foreground">Input Value</p>
-              <p className="font-mono break-all">{displayData.inputValue}</p>
+              <p className="font-mono break-all">{data.inputValue}</p>
             </div>
           </div>
           <Separator />
           <div>
             <h3 className="text-lg font-semibold mb-3 font-headline text-primary">Success Report</h3>
-            {renderReport(displayData.report)}
+            {renderReport(data.report, isClient)}
           </div>
         </CardContent>
         <CardFooter className="no-print pt-6">
