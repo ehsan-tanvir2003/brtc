@@ -54,9 +54,23 @@
   background: white !important;
 }
 
+.pdf-render .bg-card {
+  background-color: white !important;
+  box-shadow: none !important;
+  border: 1px solid #e2e8f0 !important;
+}
+
 .pdf-render * {
   color: black !important;
   border-color: #e2e8f0 !important; /* A light gray border color */
+}
+
+.pdf-render .text-primary {
+    color: #2563eb !important; /* A standard blue for professionalism */
+}
+
+.pdf-render .text-accent {
+    color: #16a34a !important; /* A standard green for success states */
 }
 
 .pdf-render svg text {

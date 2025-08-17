@@ -33,11 +33,14 @@ export function VoucherSheet({ data }: VoucherSheetProps) {
     html2canvas(voucherElement, { 
       scale: 2, // Higher scale for better quality
       useCORS: true,
-      backgroundColor: null, 
+      backgroundColor: null,
       onclone: (document) => {
         // On clone, we can modify the cloned document before it's rendered.
         // Let's add a class to the body to scope our PDF styles.
-        document.body.classList.add('pdf-render');
+        const clonedVoucher = document.getElementById('voucher-to-print');
+        if (clonedVoucher) {
+            clonedVoucher.classList.add('pdf-render');
+        }
       }
     }).then((canvas) => {
       const imgData = canvas.toDataURL("image/png");
