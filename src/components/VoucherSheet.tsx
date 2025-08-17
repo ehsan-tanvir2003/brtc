@@ -23,46 +23,59 @@ export function VoucherSheet({ data }: VoucherSheetProps) {
     setDisplayTimestamp(new Date(data.timestamp).toLocaleString());
   }, [data.timestamp]);
 
-
-  const handleDownloadPdf = () => {
+  const handleDownloadPdf = async () => {
     const voucherElement = document.getElementById("voucher-to-print");
     if (!voucherElement) return;
-
+  
     setIsDownloading(true);
-
-    html2canvas(voucherElement, { 
-      scale: 2, // Higher scale for better quality
-      useCORS: true,
-      backgroundColor: null,
-      onclone: (document) => {
-        // On clone, we can modify the cloned document before it's rendered.
-        // Let's add a class to the body to scope our PDF styles.
-        const clonedVoucher = document.getElementById('voucher-to-print');
-        if (clonedVoucher) {
-            clonedVoucher.classList.add('pdf-render');
+  
+    // Add the pdf-render class to apply specific styles for PDF
+    voucherElement.classList.add('pdf-render');
+  
+    // Find all Next/Image components and ensure they are loaded
+    const images = Array.from(voucherElement.getElementsByTagName('img'));
+    const promises = images.map(img => {
+      if (img.complete) return Promise.resolve();
+      return new Promise(resolve => { img.onload = resolve; img.onerror = resolve; });
+    });
+  
+    await Promise.all(promises);
+  
+    try {
+      const canvas = await html2canvas(voucherElement, {
+        scale: 3, // Increased scale for better quality
+        useCORS: true,
+        backgroundColor: '#ffffff', // Explicitly set background to white
+        onclone: (document) => {
+            const clonedVoucher = document.getElementById('voucher-to-print');
+            if(clonedVoucher) {
+                // Ensure the class is on the cloned element as well
+                 clonedVoucher.classList.add('pdf-render');
+            }
         }
-      }
-    }).then((canvas) => {
+      });
+  
       const imgData = canvas.toDataURL("image/png");
       const pdf = new jsPDF({
         orientation: "portrait",
         unit: "pt",
         format: "a4",
       });
-
+  
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = pdf.internal.pageSize.getHeight();
+      
       const canvasWidth = canvas.width;
       const canvasHeight = canvas.height;
+      
       const canvasAspectRatio = canvasWidth / canvasHeight;
-      const pdfAspectRatio = pdfWidth / pdfHeight;
-
-      let renderWidth = pdfWidth;
-      let renderHeight = pdfWidth / canvasAspectRatio;
-
-      if(renderHeight > pdfHeight) {
-        renderHeight = pdfHeight;
-        renderWidth = pdfHeight * canvasAspectRatio;
+      
+      let renderWidth = pdfWidth - 40; // Add some padding
+      let renderHeight = renderWidth / canvasAspectRatio;
+  
+      if (renderHeight > pdfHeight - 40) {
+        renderHeight = pdfHeight - 40;
+        renderWidth = renderHeight * canvasAspectRatio;
       }
       
       const x = (pdfWidth - renderWidth) / 2;
@@ -70,11 +83,14 @@ export function VoucherSheet({ data }: VoucherSheetProps) {
       
       pdf.addImage(imgData, "PNG", x, y, renderWidth, renderHeight);
       pdf.save(`voucher-${data.orderId}.pdf`);
+  
+    } catch (err) {
+      console.error("Error generating PDF", err);
+    } finally {
+      // Clean up the class after we're done.
+      voucherElement.classList.remove('pdf-render');
       setIsDownloading(false);
-    }).catch(err => {
-        console.error("Error generating PDF", err);
-        setIsDownloading(false);
-    });
+    }
   };
 
   return (

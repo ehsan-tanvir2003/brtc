@@ -51,7 +51,7 @@
 }
 
 .pdf-render {
-  background: white !important;
+  background-color: white !important;
 }
 
 .pdf-render .bg-card {
@@ -63,6 +63,12 @@
 .pdf-render * {
   color: black !important;
   border-color: #e2e8f0 !important; /* A light gray border color */
+}
+
+.pdf-render img {
+  object-fit: contain !important; /* Ensures the logo is not cropped */
+  max-width: 100% !important;
+  height: auto !important;
 }
 
 .pdf-render .text-primary {
