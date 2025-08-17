@@ -3,7 +3,7 @@
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import type { VoucherData } from "@/types";
-import { FileText, Clock, Smartphone, LocateIcon, BadgePercent, Timer, Banknote } from "lucide-react";
+import { FileText, Clock, Timer } from "lucide-react";
 import { ServiceIcon } from "./ServiceIcon";
 
 interface VoucherSheetProps {
@@ -12,14 +12,6 @@ interface VoucherSheetProps {
 
 export function VoucherSheet({ data }: VoucherSheetProps) {
   const displayTimestamp = new Date(data.timestamp).toLocaleString();
-
-  const getEstimatedTime = (service: string) => {
-    if (service === 'CDR (Call Logs)') return "12-24 hours";
-    if (service === 'Location Tracking') return "1 hour max";
-    return null;
-  }
-  
-  const estimatedTime = getEstimatedTime(data.service);
 
   return (
     <div id="voucher-to-print" className="voucher-print-area">
@@ -83,17 +75,10 @@ export function VoucherSheet({ data }: VoucherSheetProps) {
           <div>
             <h3 className="text-lg font-semibold mb-3 font-headline text-primary">Service Information</h3>
              <ul className="space-y-2 font-mono text-sm">
-                {estimatedTime && (
-                  <li className="flex justify-between border-b border-dashed border-border/50 pb-2">
-                      <span className="capitalize text-muted-foreground flex items-center gap-2"><Timer/>Estimated Time:</span>
-                      <span className="text-accent">{estimatedTime}</span>
-                  </li>
-                )}
-                {!estimatedTime && (
-                  <li className="flex justify-between border-b border-dashed border-border/50 pb-2">
-                    <span className="text-muted-foreground">No standard time estimate for this service.</span>
-                  </li>
-                )}
+                <li className="flex justify-between border-b border-dashed border-border/50 pb-2">
+                    <span className="capitalize text-muted-foreground flex items-center gap-2"><Timer/>Standard Time:</span>
+                    <span className="text-accent">0900 hours to 2200 hours</span>
+                </li>
             </ul>
           </div>
         </CardContent>
