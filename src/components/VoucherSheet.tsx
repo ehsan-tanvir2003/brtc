@@ -2,11 +2,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import type { VoucherData } from "@/types";
-import { Download, FileText } from "lucide-react";
+import { FileText } from "lucide-react";
 import { ServiceIcon } from "./ServiceIcon";
 
 interface VoucherSheetProps {
@@ -59,10 +58,6 @@ export function VoucherSheet({ data }: VoucherSheetProps) {
   useEffect(() => {
     setIsClient(true);
   }, []);
-
-  const handlePrint = () => {
-    window.print();
-  };
   
   const formattedTimestamp = isClient ? new Date(data.timestamp).toLocaleString() : data.timestamp;
 
@@ -107,10 +102,6 @@ export function VoucherSheet({ data }: VoucherSheetProps) {
           </div>
         </CardContent>
         <CardFooter className="no-print pt-6">
-          <Button onClick={handlePrint} className="w-full">
-            <Download className="mr-2 h-4 w-4" />
-            Download PDF
-          </Button>
         </CardFooter>
       </Card>
     </div>
