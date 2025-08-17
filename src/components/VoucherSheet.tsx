@@ -22,20 +22,32 @@ export function VoucherSheet({ data }: VoucherSheetProps) {
     const voucherElement = document.getElementById('voucher-to-print');
     if (voucherElement) {
         setIsDownloading(true);
+
+        const width = voucherElement.offsetWidth;
+        const height = voucherElement.offsetHeight;
+        
         html2canvas(voucherElement, { 
-            scale: 2, // Higher scale for better quality
+            scale: 2,
             useCORS: true,
+            width: width,
+            height: height,
             onclone: (document) => {
               document.getElementById('voucher-to-print')?.classList.add('pdf-render');
             }
         }).then(canvas => {
             const imgData = canvas.toDataURL('image/png');
+            
+            // A4 page size in pixels at 96 DPI: 794x1123
+            const pdfWidth = 794; 
+            const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+            
             const pdf = new jsPDF({
                 orientation: 'portrait',
                 unit: 'px',
-                format: [canvas.width, canvas.height]
+                format: [pdfWidth, pdfHeight]
             });
-            pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+
+            pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
             pdf.save(`voucher-${data.orderId}.pdf`);
             setIsDownloading(false);
         }).catch(err => {
