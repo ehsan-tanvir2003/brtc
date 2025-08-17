@@ -1,6 +1,5 @@
 "use server";
 
-import { validateVoucherSheet } from "@/ai/flows/validate-voucher-sheet";
 import type { ServiceName, VoucherData, GenerationResult } from "@/types";
 
 function generateDummyReport(service: ServiceName, inputValue: string): Record<string, any> {
@@ -52,56 +51,20 @@ export async function generateVoucher(
   service: ServiceName,
   inputValue: string
 ): Promise<GenerationResult> {
-  const orderId = generateRandomOrderId();
-  const timestamp = new Date().toISOString();
-
-  const preliminaryVoucher = {
-    orderId,
-    service,
-    input: inputValue,
-    status: 'pending',
-    timestamp,
-  };
-
-  const userInput = {
-    service,
-    inputValue,
-  };
-
   try {
-    const validationResult = await validateVoucherSheet({
-      voucherSheetData: JSON.stringify(preliminaryVoucher),
-      userInputData: JSON.stringify(userInput),
-    });
+    const orderId = generateRandomOrderId();
+    const timestamp = new Date().toISOString();
 
-    if (!validationResult.isValid || (validationResult.errors && validationResult.errors.length > 0)) {
-      console.error("AI Validation Failed:", validationResult.errors);
-      const errorMessage = validationResult.errors?.length > 0
-        ? `Validation failed: ${validationResult.errors.join(', ')}`
-        : "AI validation returned invalid.";
-      return {
-        error: errorMessage,
-        suggestions: validationResult.suggestions,
-      };
-    }
-
-    // Use corrected data from AI if available, otherwise use original
-    const correctedVoucherData = validationResult.correctedVoucherSheetData ? JSON.parse(validationResult.correctedVoucherSheetData) : {};
-    const correctedInputData = validationResult.correctedUserInputData ? JSON.parse(validationResult.correctedUserInputData) : {};
-
-    const finalInputValue = correctedInputData.inputValue || inputValue;
-    const finalService = correctedInputData.service || service;
-    
-    // Simulate service execution
+    // Simulate network delay and processing
     await new Promise(resolve => setTimeout(resolve, 1500));
 
     const voucherData: VoucherData = {
-      orderId: correctedVoucherData.orderId || orderId,
-      service: finalService,
-      inputValue: finalInputValue,
+      orderId,
+      service,
+      inputValue,
       timestamp,
       status: "Success",
-      report: generateDummyReport(finalService, finalInputValue),
+      report: generateDummyReport(service, inputValue),
     };
 
     return { voucherData };
