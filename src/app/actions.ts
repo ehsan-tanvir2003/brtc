@@ -42,11 +42,17 @@ function generateDummyReport(service: ServiceName, inputValue: string): Record<s
     }
 }
 
+function generateRandomOrderId(): string {
+  const prefix = "IQDATA";
+  const randomPart = Math.random().toString(36).substring(2, 10).toUpperCase();
+  return `${prefix}${randomPart}`;
+}
+
 export async function generateVoucher(
   service: ServiceName,
   inputValue: string
 ): Promise<GenerationResult> {
-  const orderId = `IQDATA3421${Date.now()}`;
+  const orderId = generateRandomOrderId();
   const timestamp = new Date().toISOString();
 
   const preliminaryVoucher = {
@@ -68,24 +74,29 @@ export async function generateVoucher(
       userInputData: JSON.stringify(userInput),
     });
 
-    if (!validationResult.isValid || validationResult.errors.length > 0) {
+    if (!validationResult.isValid || (validationResult.errors && validationResult.errors.length > 0)) {
       console.error("AI Validation Failed:", validationResult.errors);
+      const errorMessage = validationResult.errors?.length > 0
+        ? `Validation failed: ${validationResult.errors.join(', ')}`
+        : "AI validation returned invalid.";
       return {
-        error: `Validation failed: ${validationResult.errors.join(', ')}`,
+        error: errorMessage,
         suggestions: validationResult.suggestions,
       };
     }
 
-    // Use corrected data from AI if available
-    const correctedInput = JSON.parse(validationResult.correctedUserInputData);
-    const finalInputValue = correctedInput.inputValue || inputValue;
-    const finalService = correctedInput.service || service;
+    // Use corrected data from AI if available, otherwise use original
+    const correctedVoucherData = validationResult.correctedVoucherSheetData ? JSON.parse(validationResult.correctedVoucherSheetData) : {};
+    const correctedInputData = validationResult.correctedUserInputData ? JSON.parse(validationResult.correctedUserInputData) : {};
+
+    const finalInputValue = correctedInputData.inputValue || inputValue;
+    const finalService = correctedInputData.service || service;
     
     // Simulate service execution
     await new Promise(resolve => setTimeout(resolve, 1500));
 
     const voucherData: VoucherData = {
-      orderId,
+      orderId: correctedVoucherData.orderId || orderId,
       service: finalService,
       inputValue: finalInputValue,
       timestamp,
