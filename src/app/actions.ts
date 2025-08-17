@@ -21,23 +21,23 @@ function generateDummyReport(service: ServiceName, inputValue: string): Record<s
         case "CDR (Call Logs)":
              return {
                 "Target Number": inputValue,
-                "Total Calls": Math.floor(Math.random() * 100) + 50,
-                "Total Duration": `${Math.floor(Math.random() * 500) + 100} minutes`,
-                "Last Call": new Date(Date.now() - Math.random() * 1e10).toLocaleDateString(),
+                "Total Calls": 0, // Placeholder
+                "Total Duration": `0 minutes`, // Placeholder
+                "Last Call": "N/A", // Placeholder
             };
         case "Location Tracking":
             return {
                 "Target ID": inputValue,
-                "Latitude": (23.8103 + (Math.random() - 0.5) * 0.1).toFixed(6),
-                "Longitude": (90.4125 + (Math.random() - 0.5) * 0.1).toFixed(6),
-                "Last Updated": new Date().toISOString(),
+                "Latitude": "0.000000", // Placeholder
+                "Longitude": "0.000000", // Placeholder
+                "Last Updated": "N/A", // Placeholder
             };
         default:
             return {
                 "Account": inputValue,
-                "Balance": `৳${(Math.random() * 10000).toFixed(2)}`,
+                "Balance": `৳0.00`, // Placeholder
                 "Status": "Active",
-                "Recent Transactions": Math.floor(Math.random() * 20) + 5,
+                "Recent Transactions": 0, // Placeholder
             };
     }
 }
