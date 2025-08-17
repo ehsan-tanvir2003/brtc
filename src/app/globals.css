@@ -59,6 +59,14 @@
   border-color: #e2e8f0 !important; /* A light gray border color */
 }
 
+.pdf-render svg text {
+  fill: #000 !important;
+}
+
+.pdf-render svg path {
+    stroke: #000 !important;
+}
+
 @media print {
   body * {
     visibility: hidden;

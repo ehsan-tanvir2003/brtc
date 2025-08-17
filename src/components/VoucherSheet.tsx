@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Separator } from "@/components/ui/separator";
 import type { VoucherData } from "@/types";
 import { FileText, Clock, Timer, Download } from "lucide-react";
-import { ServiceIcon } from "./ServiceIcon";
+import { Logo } from "./Logo";
 import { Button } from "./ui/button";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
@@ -52,13 +52,20 @@ export function VoucherSheet({ data }: VoucherSheetProps) {
           <CardHeader>
             <div className="flex justify-between items-start">
                 <div>
-                  <CardTitle className="font-headline text-accent flex items-center gap-2">
-                      <FileText />
-                      Voucher Sheet
-                  </CardTitle>
-                  <CardDescription className="pt-2">Order successfully created.</CardDescription>
+                   <div className="flex items-center gap-4 mb-4">
+                     <Logo className="w-16 h-16" />
+                     <div>
+                       <CardTitle className="font-headline text-accent text-2xl">
+                         Voucher Sheet
+                       </CardTitle>
+                       <CardDescription className="pt-1">Order successfully created.</CardDescription>
+                     </div>
+                   </div>
                 </div>
-                <ServiceIcon service={data.service} className="w-10 h-10 text-primary" />
+                <div className="text-right">
+                    <p className="font-bold text-lg text-primary">BTRC DATA HUB</p>
+                    <p className="text-xs text-muted-foreground">Official Data Service Portal</p>
+                </div>
             </div>
           </CardHeader>
           <CardContent className="space-y-6">
