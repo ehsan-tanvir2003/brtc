@@ -35,11 +35,17 @@ export function VoucherSheet({ data }: VoucherSheetProps) {
     // Find all Next/Image components and ensure they are loaded
     const images = Array.from(voucherElement.getElementsByTagName('img'));
     const promises = images.map(img => {
-      if (img.complete) return Promise.resolve();
-      return new Promise(resolve => { img.onload = resolve; img.onerror = resolve; });
+      if (img.complete && img.naturalHeight !== 0) return Promise.resolve();
+      return new Promise(resolve => { 
+        img.onload = resolve; 
+        img.onerror = resolve; // Resolve on error too, to not block pdf generation
+      });
     });
   
     await Promise.all(promises);
+    
+    // A small delay to ensure styles are applied, especially for web fonts
+    await new Promise(resolve => setTimeout(resolve, 100));
   
     try {
       const canvas = await html2canvas(voucherElement, {
@@ -69,6 +75,7 @@ export function VoucherSheet({ data }: VoucherSheetProps) {
       const canvasHeight = canvas.height;
       
       const canvasAspectRatio = canvasWidth / canvasHeight;
+      const pdfAspectRatio = pdfWidth / pdfHeight;
       
       let renderWidth = pdfWidth - 40; // Add some padding
       let renderHeight = renderWidth / canvasAspectRatio;
