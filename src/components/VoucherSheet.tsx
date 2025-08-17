@@ -58,9 +58,9 @@ export function VoucherSheet({ data }: VoucherSheetProps) {
   };
 
   return (
-    <>
+    <div>
       <div id="voucher-to-print" className="voucher-print-area">
-        <Card className="w-full max-w-2xl mx-auto bg-transparent border-none shadow-none">
+        <Card className="w-full max-w-2xl mx-auto bg-card text-card-foreground shadow-lg rounded-lg">
           <CardHeader>
             <div className="flex justify-between items-start">
                 <div>
@@ -134,7 +134,8 @@ export function VoucherSheet({ data }: VoucherSheetProps) {
               </ul>
             </div>
           </CardContent>
-          <CardFooter className="no-print pt-6">
+          <CardFooter className="pt-6">
+             <p className="text-xs text-muted-foreground text-center w-full">This is a system-generated voucher and does not require a signature.</p>
           </CardFooter>
         </Card>
       </div>
@@ -144,6 +145,6 @@ export function VoucherSheet({ data }: VoucherSheetProps) {
             {isDownloading ? "Downloading..." : "Download PDF"}
         </Button>
       </div>
-    </>
+    </div>
   );
 }
