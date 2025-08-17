@@ -25,7 +25,7 @@ export function NetworkStatusAnimation() {
   return (
     <>
       {/* Top-left animation */}
-      <div className="fixed top-4 left-4 hidden md:flex flex-col items-start gap-2 p-2 rounded-lg bg-card/50 border border-border/30 backdrop-blur-sm z-50 pointer-events-none">
+      <div className="fixed top-4 left-4 flex flex-col items-start gap-2 p-2 rounded-lg bg-card/50 border border-border/30 backdrop-blur-sm z-50 pointer-events-none">
         <div className="flex items-center gap-2">
           <Server className="h-4 w-4 text-primary" />
           <p className="text-xs font-mono font-bold text-primary">BTRC-SRV-01</p>
@@ -41,7 +41,7 @@ export function NetworkStatusAnimation() {
       </div>
 
       {/* Top-right animation */}
-      <div className="fixed top-4 right-4 hidden md:flex flex-col items-end gap-2 p-2 rounded-lg bg-card/50 border border-border/30 backdrop-blur-sm z-50 pointer-events-none">
+      <div className="fixed top-4 right-4 flex flex-col items-end gap-2 p-2 rounded-lg bg-card/50 border border-border/30 backdrop-blur-sm z-50 pointer-events-none">
         <div className="flex items-center gap-2">
           <p className="text-xs font-mono font-bold text-accent">SECURE-256-AES</p>
           <ShieldCheck className="h-4 w-4 text-accent" />
@@ -60,4 +60,3 @@ export function NetworkStatusAnimation() {
     </>
   );
 }
-
