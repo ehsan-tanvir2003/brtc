@@ -74,7 +74,7 @@ export function VoucherSheet({ data }: VoucherSheetProps) {
         addField("Order ID:", data.orderId);
         addField("Timestamp:", displayTimestamp);
         addField("Service:", data.service);
-        addField("Target Number:", data.inputValue);
+        addField("Target:", data.inputValue);
         if(data.operator) addField("Operator:", data.operator);
         if(data.timeDuration) addField("Time Duration:", data.timeDuration);
         if(data.paymentTotal) addField("Payment Total:", `৳${data.paymentTotal}`);
@@ -155,7 +155,7 @@ export function VoucherSheet({ data }: VoucherSheetProps) {
                 <p>{data.service}</p>
               </div>
               <div className="space-y-1">
-                <p className="text-muted-foreground">Target Number</p>
+                <p className="text-muted-foreground">Target</p>
                 <p className="font-mono break-all">{data.inputValue}</p>
               </div>
               {data.operator && (
