@@ -94,10 +94,10 @@ export default function Home() {
       <div className="w-full max-w-2xl mx-auto">
         <div className="text-center mb-10">
           <h1 className="text-4xl sm:text-5xl font-bold font-headline text-primary tracking-wider">
-            Phantom Intel Toolkit
+            BTRC DATA HUB
           </h1>
           <p className="text-muted-foreground mt-2">
-            Your advanced data service portal.
+            Official Data Service Portal.
           </p>
         </div>
 

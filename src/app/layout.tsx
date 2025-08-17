@@ -7,8 +7,8 @@ const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 const spaceGrotesk = Space_Grotesk({ subsets: ['latin'], variable: '--font-space-grotesk' });
 
 export const metadata: Metadata = {
-  title: 'Phantom Intel Toolkit',
-  description: 'Advanced Data Service Platform',
+  title: 'BTRC DATA HUB',
+  description: 'BTRC Data Service Platform',
 };
 
 export default function RootLayout({
